@@ -6,24 +6,48 @@ from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 from keras.applications.imagenet_utils import decode_predictions
 import matplotlib.pyplot as plt
-
+import cv2 as cv2
 
 IMAGE2 = 'traffic light.jpg'
 IMAGE1 = 'traffic1.jpg'
 
-def find_color(sliding_window, threshold=10):
-    red_level, yellow_level, green_level = 0, 0, 0
-    red_level = np.mean(sliding_window[:, :, 0])
-    green_level = np.mean(sliding_window[:, :, 1])
-    yellow_level = (red_level + green_level) / 2
-    if np.abs(red_level - yellow_level) < threshold:
-        return "red+yellow"
-    if red_level == max(red_level, yellow_level, green_level):
-        return "red"
-    if yellow_level == max(red_level, yellow_level, green_level):
-        return "yellow"
-    else:
-        return "green"
+# def find_color(sliding_window, threshold=10):
+#     red_level, yellow_level, green_level = 0, 0, 0
+#     red_level = np.mean(sliding_window[:, :, 0])
+#     green_level = np.mean(sliding_window[:, :, 1])
+#     yellow_level = (red_level + green_level) / 2
+#     if np.abs(red_level - yellow_level) < threshold:
+#         return "red+yellow"
+#     if red_level == max(red_level, yellow_level, green_level):
+#         return "red"
+#     if yellow_level == max(red_level, yellow_level, green_level):
+#         return "yellow"
+#     else:
+#         return "green"
+
+def find_color(sliding_window):
+    # hsv = cv2.cvtColor(sliding_window, cv2.COLOR_BGR2HSV)
+
+    # finding red color
+    low_red=np.array([150,0,60])
+    upper_red = np.array([255,50,150])
+    mask_red = cv2.inRange(sliding_window, lowerb=low_red, upperb=upper_red)
+
+    # finding yellow color
+    low_yellow = np.array([220, 90, 0])
+    upper_yello = np.array([255, 255, 60])
+    mask_yellow = cv2.inRange(sliding_window, lowerb=low_yellow, upperb=upper_yello)
+
+    # merge the masks to get the total resualt
+    total_mask = mask_red + mask_yellow
+
+    cv2.imshow('original', sliding_window)
+    cv2.imshow('after process', total_mask)
+
+
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+    return True
 
 def isTrafficLight(sliding_window):
     sliding_window_image = Image.fromarray(np.uint8(sliding_window))
